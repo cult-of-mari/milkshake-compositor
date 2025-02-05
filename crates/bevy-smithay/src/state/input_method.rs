@@ -1,11 +1,7 @@
-use {
-    super::SmithayAppRunnerState,
-    smithay::{
-        reexports::wayland_server::protocol::wl_surface::WlSurface,
-        utils::{Logical, Rectangle},
-        wayland::input_method::{InputMethodHandler, PopupSurface},
-    },
-};
+use super::SmithayAppRunnerState;
+use smithay::reexports::wayland_server::protocol::wl_surface::WlSurface;
+use smithay::utils::{Logical, Rectangle};
+use smithay::wayland::input_method::{InputMethodHandler, PopupSurface};
 
 impl InputMethodHandler for SmithayAppRunnerState {
     fn new_popup(&mut self, _surface: PopupSurface) {}

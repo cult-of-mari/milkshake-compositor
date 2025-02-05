@@ -1,7 +1,5 @@
-use {
-    super::SmithayAppRunnerState,
-    smithay::wayland::shm::{ShmHandler, ShmState},
-};
+use super::SmithayAppRunnerState;
+use smithay::wayland::shm::{ShmHandler, ShmState};
 
 impl ShmHandler for SmithayAppRunnerState {
     fn shm_state(&self) -> &ShmState {

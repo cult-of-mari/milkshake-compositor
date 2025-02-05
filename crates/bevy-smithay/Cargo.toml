@@ -4,9 +4,9 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
-ash.workspace = true
-bevy.workspace = true
-smithay.workspace = true
-smithay-drm-extras.workspace = true
-thiserror.workspace = true
-wgpu.workspace = true
+ash = { workspace = true }
+bevy = { workspace = true, features = ["bevy_asset", "bevy_render"] }
+smithay = { workspace = true, features = ["backend_drm", "backend_gbm", "backend_libinput", "backend_session", "backend_session_libseat", "backend_udev", "backend_x11", "desktop", "wayland_frontend", "xwayland"] }
+smithay-drm-extras = { workspace = true }
+thiserror = { workspace = true }
+wgpu = { workspace = true }

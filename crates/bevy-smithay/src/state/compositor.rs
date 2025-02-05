@@ -1,11 +1,8 @@
-use {
-    super::{ClientState, SmithayAppRunnerState},
-    smithay::{
-        reexports::wayland_server::{protocol::wl_surface::WlSurface, Client},
-        wayland::compositor::{CompositorClientState, CompositorHandler, CompositorState},
-        xwayland::XWaylandClientData,
-    },
-};
+use super::{ClientState, SmithayAppRunnerState};
+use smithay::reexports::wayland_server::protocol::wl_surface::WlSurface;
+use smithay::reexports::wayland_server::Client;
+use smithay::wayland::compositor::{CompositorClientState, CompositorHandler, CompositorState};
+use smithay::xwayland::XWaylandClientData;
 
 impl CompositorHandler for SmithayAppRunnerState {
     fn compositor_state(&mut self) -> &mut CompositorState {

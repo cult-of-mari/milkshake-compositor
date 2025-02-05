@@ -1,7 +1,6 @@
-use {
-    smithay::backend::{drm::DrmNode, udev},
-    std::path::PathBuf,
-};
+use smithay::backend::drm::DrmNode;
+use smithay::backend::udev;
+use std::path::PathBuf;
 
 /// Open a DRM render node with render nodes.
 fn open_drm_node(path: PathBuf) -> Option<DrmNode> {

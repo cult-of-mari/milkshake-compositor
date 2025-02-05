@@ -1,8 +1,6 @@
-use {
-    super::SmithayAppRunnerState,
-    smithay::wayland::selection::primary_selection::{
-        PrimarySelectionHandler, PrimarySelectionState,
-    },
+use super::SmithayAppRunnerState;
+use smithay::wayland::selection::primary_selection::{
+    PrimarySelectionHandler, PrimarySelectionState,
 };
 
 impl PrimarySelectionHandler for SmithayAppRunnerState {

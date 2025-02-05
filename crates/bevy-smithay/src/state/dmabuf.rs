@@ -1,22 +1,17 @@
-use {
-    super::SmithayAppRunnerState,
-    crate::{external_image::ExternalImages, util},
-    bevy::{
-        asset::Assets,
-        render::{
-            camera::{ManualTextureViewHandle, RenderTarget},
-            render_asset::RenderAssetUsages,
-            renderer::RenderDevice,
-            texture::{GpuImage, Image, ImageSamplerDescriptor},
-        },
-    },
-    smithay::{
-        backend::allocator::dmabuf::Dmabuf,
-        reexports::{gbm::BufferObjectFlags, wayland_server::protocol::wl_surface::WlSurface},
-        wayland::dmabuf::{
-            DmabufFeedback, DmabufGlobal, DmabufHandler, DmabufState, ImportNotifier,
-        },
-    },
+use super::SmithayAppRunnerState;
+use crate::external_image::ExternalImages;
+use crate::util;
+use bevy::asset::Assets;
+use bevy::image::{Image, ImageSamplerDescriptor};
+use bevy::render::camera::{ManualTextureViewHandle, RenderTarget};
+use bevy::render::render_asset::RenderAssetUsages;
+use bevy::render::renderer::RenderDevice;
+use bevy::render::texture::GpuImage;
+use smithay::backend::allocator::dmabuf::Dmabuf;
+use smithay::reexports::gbm::BufferObjectFlags;
+use smithay::reexports::wayland_server::protocol::wl_surface::WlSurface;
+use smithay::wayland::dmabuf::{
+    DmabufFeedback, DmabufGlobal, DmabufHandler, DmabufState, ImportNotifier,
 };
 
 impl DmabufHandler for SmithayAppRunnerState {

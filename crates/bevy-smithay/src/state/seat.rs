@@ -1,10 +1,6 @@
-use {
-    super::SmithayAppRunnerState,
-    smithay::{
-        input::{SeatHandler, SeatState},
-        reexports::wayland_server::protocol::wl_surface::WlSurface,
-    },
-};
+use super::SmithayAppRunnerState;
+use smithay::input::{SeatHandler, SeatState};
+use smithay::reexports::wayland_server::protocol::wl_surface::WlSurface;
 
 impl SeatHandler for SmithayAppRunnerState {
     type KeyboardFocus = WlSurface;

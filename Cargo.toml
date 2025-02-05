@@ -4,48 +4,30 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
-ash.workspace = true
-drm = { version = "0.14.0", default-features = false }
-bevy.workspace = true
-bevy-smithay.workspace = true
-smithay.workspace = true
-smithay-drm-extras.workspace = true
-thiserror.workspace = true
-wgpu.workspace = true
+ash = { workspace = true }
+bevy = { workspace = true, features = ["bevy_pbr", "bevy_text", "bevy_ui", "bevy_window"] }
+bevy-smithay = { workspace = true }
+thiserror = { workspace = true }
+wgpu = { workspace = true }
 
 [workspace]
 members = ["crates/*"]
 resolver = "2"
 
 [workspace.dependencies]
-ash = { version = "0.37.3", default-features = false }
-bevy = { version = "0.14.2", default-features = false, features = [
-    "animation",
-    "bevy_asset",
-    "bevy_audio",
-    "bevy_core_pipeline",
-    "bevy_state",
-    "bevy_render",
-    "bevy_pbr",
-    "bevy_ui",
-    "tonemapping_luts",
-    "png",
-] }
-bevy-smithay.path = "crates/bevy-smithay"
-smithay = { git = "https://github.com/Smithay/smithay", version = "0.3.0", default-features = false, features = [
-    "backend_drm",
-    "backend_gbm",
-    "backend_libinput",
-    "backend_session_libseat",
-    "backend_udev",
-    "desktop",
-    "xwayland",
-] }
-smithay-drm-extras = { git = "https://github.com/Smithay/smithay", version = "0.1.0", default-features = false, features = [
-    "display-info",
-] }
-thiserror = "1.0.64"
-wgpu = { version = "0.20.1", default-features = false }
+# external crates
+ash = { version = "0.38", default-features = false }
+bevy = { version = "0.15", default-features = false }
+smithay = { git = "https://github.com/Smithay/smithay", rev = "f93476cebab3d47f6729354805b3e184f6878ef2", version = "0.4", default-features = false }
+smithay-drm-extras = { git = "https://github.com/Smithay/smithay", rev = "f93476cebab3d47f6729354805b3e184f6878ef2", version = "0.1", default-features = false }
+thiserror = "2"
+wgpu = { version = "23", default-features = false }
+
+# internal crates
+bevy-smithay = { version = "0", path = "crates/bevy-smithay" }
 
 [profile.dev.package."*"]
+opt-level = 3
+
+[profile.dev]
 opt-level = 2

@@ -1,34 +1,21 @@
-use {
-    ash::vk,
-    bevy::{
-        math::UVec2,
-        render::{
-            camera::ManualTextureView,
-            render_resource::{Texture, TextureView},
-            renderer::RenderDevice,
-        },
-    },
-    core::slice,
-    smithay::{
-        backend::allocator::{gbm::GbmBuffer, Modifier},
-        reexports::{
-            drm,
-            gbm::{DeviceDestroyedError, FdError},
-        },
-    },
-    std::os::fd::{IntoRawFd, OwnedFd},
-    wgpu::hal as wgpu_hal,
-};
+use ash::vk;
+use bevy::math::UVec2;
+use bevy::render::camera::ManualTextureView;
+use bevy::render::render_resource::{Texture, TextureView};
+use bevy::render::renderer::RenderDevice;
+use core::slice;
+use smithay::backend::allocator::gbm::GbmBuffer;
+use smithay::backend::allocator::Modifier;
+use smithay::reexports::{drm, gbm};
+use std::os::fd::{IntoRawFd, OwnedFd};
+use wgpu::hal as wgpu_hal;
 
 #[derive(Debug, thiserror::Error)]
 pub enum ImportError {
-    #[error("gbm: {0}")]
-    GbmDestroyed(#[from] DeviceDestroyedError),
+    #[error("Invalid GBM descriptor: {0}")]
+    InvalidFd(#[from] gbm::InvalidFdError),
 
-    #[error("gbm: {0}")]
-    GbmFd(#[from] FdError),
-
-    #[error("vulkan: {0}")]
+    #[error("Vulkan: {0}")]
     Vulkan(#[from] vk::Result),
 }
 
@@ -39,9 +26,9 @@ pub fn import_texture(
     let wgpu_device = render_device.wgpu_device();
 
     let dmabuf_fd = gbm_buffer.fd_for_plane(0)?;
-    let drm_modifier = gbm_buffer.modifier()?;
-    let offset = gbm_buffer.offset(0)?;
-    let stride = gbm_buffer.stride_for_plane(0)?.into();
+    let drm_modifier = gbm_buffer.modifier();
+    let offset = gbm_buffer.offset(0);
+    let stride = gbm_buffer.stride_for_plane(0).try_into().unwrap();
     let (width, height) = drm::buffer::Buffer::size(gbm_buffer);
 
     let (vk_image, _vk_device_memory) = unsafe {
@@ -133,18 +120,18 @@ fn create_dmabuf_texture(
     offset: u32,
     stride: u64,
 ) -> Result<(vk::Image, vk::DeviceMemory), ImportError> {
-    let mut external_image_info = vk::ExternalMemoryImageCreateInfo::builder()
+    let mut external_image_info = vk::ExternalMemoryImageCreateInfo::default()
         .handle_types(vk::ExternalMemoryHandleTypeFlags::DMA_BUF_EXT);
 
-    let subresource_layout = vk::SubresourceLayout::builder()
+    let subresource_layout = vk::SubresourceLayout::default()
         .offset(u64::from(offset))
         .row_pitch(stride);
 
-    let mut modifier_info = vk::ImageDrmFormatModifierExplicitCreateInfoEXT::builder()
+    let mut modifier_info = vk::ImageDrmFormatModifierExplicitCreateInfoEXT::default()
         .drm_format_modifier(u64::from(drm_modifier))
         .plane_layouts(slice::from_ref(&subresource_layout));
 
-    let image_info = vk::ImageCreateInfo::builder()
+    let image_info = vk::ImageCreateInfo::default()
         .array_layers(1)
         .extent(extent)
         .format(vk::Format::B8G8R8A8_SRGB)
@@ -161,13 +148,13 @@ fn create_dmabuf_texture(
     let image = unsafe { device.create_image(&image_info, None)? };
     let memory_requirements = unsafe { device.get_image_memory_requirements(image) };
 
-    let mut import_memory_info = vk::ImportMemoryFdInfoKHR::builder()
+    let mut import_memory_info = vk::ImportMemoryFdInfoKHR::default()
         .fd(dmabuf_fd.into_raw_fd())
         .handle_type(vk::ExternalMemoryHandleTypeFlags::DMA_BUF_EXT);
 
-    let mut dedicated_info = vk::MemoryDedicatedAllocateInfo::builder().image(image);
+    let mut dedicated_info = vk::MemoryDedicatedAllocateInfo::default().image(image);
 
-    let memory_info = vk::MemoryAllocateInfo::builder()
+    let memory_info = vk::MemoryAllocateInfo::default()
         .allocation_size(memory_requirements.size)
         .memory_type_index(0)
         .push_next(&mut dedicated_info)

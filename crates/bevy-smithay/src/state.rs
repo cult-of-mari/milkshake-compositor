@@ -1,69 +1,53 @@
-use {
-    super::util,
-    bevy::{
-        app::PluginsState,
-        prelude::*,
-        render::{
-            camera::{ManualTextureViewHandle, ManualTextureViews, RenderTarget},
-            extract_resource::ExtractResource,
-            renderer::RenderDevice,
-            texture::GpuImage,
-        },
-        utils::HashMap,
-    },
-    smithay::{
-        backend::{
-            allocator::{
-                self,
-                gbm::{GbmAllocator, GbmBufferFlags, GbmDevice},
-                Fourcc, Modifier,
-            },
-            drm::{
-                gbm::Error as GbmError, DrmDevice, DrmDeviceFd, DrmError, DrmEvent, DrmNode,
-                GbmBufferedSurface, PlaneClaim,
-            },
-            input::{Event, InputEvent, KeyboardKeyEvent as _},
-            libinput::{LibinputInputBackend, LibinputSessionInterface},
-            session::{libseat::LibSeatSession, Session},
-            udev::{UdevBackend, UdevEvent},
-        },
-        desktop::{PopupManager, Space, Window, WindowSurfaceType},
-        input::{keyboard::XkbConfig, Seat, SeatState},
-        output::{Mode, Output, PhysicalProperties, Subpixel},
-        reexports::{
-            calloop::{generic::Generic, EventLoop, InsertError, Interest, PostAction},
-            gbm::{DeviceDestroyedError, FdError},
-            input::{event::keyboard::KeyboardKeyEvent, Libinput},
-            rustix::fs::OFlags,
-            wayland_server::{
-                backend::{ClientData, ClientId, DisconnectReason, InitError},
-                protocol::wl_shm::Format,
-                BindError, Display, DisplayHandle,
-            },
-        },
-        utils::{DeviceFd, Size, Transform, SERIAL_COUNTER},
-        wayland::{
-            compositor::{CompositorClientState, CompositorState},
-            dmabuf::{DmabufFeedbackBuilder, DmabufGlobal, DmabufState},
-            keyboard_shortcuts_inhibit::KeyboardShortcutsInhibitState,
-            output::OutputManagerState,
-            security_context::SecurityContext,
-            selection::{
-                data_device::DataDeviceState, primary_selection::PrimarySelectionState,
-                wlr_data_control::DataControlState,
-            },
-            shell::xdg::XdgShellState,
-            shm::ShmState,
-            socket::ListeningSocketSource,
-            xdg_foreign::XdgForeignState,
-        },
-    },
-    smithay_drm_extras::drm_scanner::{DrmScanner, SimpleCrtcMapper},
-    std::{
-        io, iter,
-        time::{Duration, Instant},
-    },
+use super::util;
+use bevy::app::PluginsState;
+use bevy::prelude::*;
+use bevy::render::camera::{ManualTextureViewHandle, ManualTextureViews, RenderTarget};
+use bevy::render::extract_resource::ExtractResource;
+use bevy::render::renderer::RenderDevice;
+use bevy::render::texture::GpuImage;
+use bevy::utils::HashMap;
+use smithay::backend::allocator::gbm::{GbmAllocator, GbmBufferFlags, GbmDevice};
+use smithay::backend::allocator::{self, Fourcc, Modifier};
+use smithay::backend::drm::gbm::Error as GbmError;
+use smithay::backend::drm::{
+    DrmDevice, DrmDeviceFd, DrmError, DrmEvent, DrmNode, GbmBufferedSurface, PlaneClaim,
 };
+use smithay::backend::input::{Event, InputEvent, KeyboardKeyEvent as _};
+use smithay::backend::libinput::{LibinputInputBackend, LibinputSessionInterface};
+use smithay::backend::session::libseat::LibSeatSession;
+use smithay::backend::session::Session;
+use smithay::backend::udev::{UdevBackend, UdevEvent};
+use smithay::desktop::{PopupManager, Space, Window, WindowSurfaceType};
+use smithay::input::keyboard::XkbConfig;
+use smithay::input::{Seat, SeatState};
+use smithay::output::{Mode, Output, PhysicalProperties, Subpixel};
+use smithay::reexports::calloop::generic::Generic;
+use smithay::reexports::calloop::{EventLoop, InsertError, Interest, PostAction};
+use smithay::reexports::gbm;
+use smithay::reexports::input::event::keyboard::KeyboardKeyEvent;
+use smithay::reexports::input::Libinput;
+use smithay::reexports::rustix::fs::OFlags;
+use smithay::reexports::wayland_server::backend::{
+    ClientData, ClientId, DisconnectReason, InitError,
+};
+use smithay::reexports::wayland_server::protocol::wl_shm::Format;
+use smithay::reexports::wayland_server::{BindError, Display, DisplayHandle};
+use smithay::utils::{DeviceFd, Size, Transform, SERIAL_COUNTER};
+use smithay::wayland::compositor::{CompositorClientState, CompositorState};
+use smithay::wayland::dmabuf::{DmabufFeedbackBuilder, DmabufGlobal, DmabufState};
+use smithay::wayland::keyboard_shortcuts_inhibit::KeyboardShortcutsInhibitState;
+use smithay::wayland::output::OutputManagerState;
+use smithay::wayland::security_context::SecurityContext;
+use smithay::wayland::selection::data_device::DataDeviceState;
+use smithay::wayland::selection::primary_selection::PrimarySelectionState;
+use smithay::wayland::selection::wlr_data_control::DataControlState;
+use smithay::wayland::shell::xdg::XdgShellState;
+use smithay::wayland::shm::ShmState;
+use smithay::wayland::socket::ListeningSocketSource;
+use smithay::wayland::xdg_foreign::XdgForeignState;
+use smithay_drm_extras::drm_scanner::{DrmScanner, SimpleCrtcMapper};
+use std::time::{Duration, Instant};
+use std::{io, iter};
 
 mod buffer;
 mod compositor;
@@ -115,11 +99,8 @@ pub enum Error {
     #[error("gbm2: {0}")]
     Gbm2(#[from] GbmError),
 
-    #[error("gbm3: {0}")]
-    Gbm3(#[from] DeviceDestroyedError),
-
-    #[error("gbm4: {0}")]
-    Gbm4(#[from] FdError),
+    #[error("Invalid GBM descriptor: {0}")]
+    InvalidGbmDescriptor(#[from] gbm::InvalidFdError),
 }
 
 impl<T> From<InsertError<T>> for Error {
@@ -248,12 +229,12 @@ impl SmithayState {
             Some(mode),
             Some(Transform::Flipped180),
             None,
-            Some((2560, 1440).into()),
+            Some((0, 0).into()),
         );
 
         output.set_preferred(mode);
 
-        space.map_output(&output, (2560, 1440));
+        space.map_output(&output, (0, 0));
 
         let start_time = Instant::now();
 
@@ -356,8 +337,7 @@ impl SmithayAppRunnerState {
 
         let drm_node = util::find_best_gpu(&seat_name).unwrap();
 
-        let drm_device_fd = dbg!(session
-            .open(&dbg!(drm_node.dev_path().unwrap()), OFlags::RDWR))
+        let drm_device_fd = dbg!(session.open(&dbg!(drm_node.dev_path().unwrap()), OFlags::RDWR))
             .map(DeviceFd::from)
             .map(DrmDeviceFd::new)
             .unwrap();

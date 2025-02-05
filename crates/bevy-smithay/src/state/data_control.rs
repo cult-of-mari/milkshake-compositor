@@ -1,7 +1,5 @@
-use {
-    super::SmithayAppRunnerState,
-    smithay::wayland::selection::wlr_data_control::{DataControlHandler, DataControlState},
-};
+use super::SmithayAppRunnerState;
+use smithay::wayland::selection::wlr_data_control::{DataControlHandler, DataControlState};
 
 impl DataControlHandler for SmithayAppRunnerState {
     fn data_control_state(&self) -> &DataControlState {

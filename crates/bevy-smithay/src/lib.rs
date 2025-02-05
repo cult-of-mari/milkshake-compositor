@@ -1,9 +1,9 @@
-use {
-    self::state::SmithayAppRunnerState,
-    bevy::{app::PluginsState, prelude::*, render::extract_resource::ExtractResourcePlugin},
-    external_image::ExternalImagePlugin,
-    smithay::reexports::calloop::EventLoop,
-};
+use self::state::SmithayAppRunnerState;
+use bevy::app::PluginsState;
+use bevy::prelude::*;
+use bevy::render::extract_resource::ExtractResourcePlugin;
+use external_image::ExternalImagePlugin;
+use smithay::reexports::calloop::EventLoop;
 
 pub mod external_image;
 pub mod state;

@@ -1,11 +1,9 @@
-use {
-    super::SmithayAppRunnerState,
-    smithay::{
-        desktop::Window,
-        reexports::wayland_server::protocol::wl_seat::WlSeat,
-        utils::Serial,
-        wayland::shell::xdg::{PopupSurface, PositionerState, ToplevelSurface, XdgShellHandler},
-    },
+use super::SmithayAppRunnerState;
+use smithay::desktop::Window;
+use smithay::reexports::wayland_server::protocol::wl_seat::WlSeat;
+use smithay::utils::Serial;
+use smithay::wayland::shell::xdg::{
+    PopupSurface, PositionerState, ToplevelSurface, XdgShellHandler,
 };
 
 impl XdgShellHandler for SmithayAppRunnerState {
@@ -19,15 +17,15 @@ impl XdgShellHandler for SmithayAppRunnerState {
         self.smithay_state.space.map_element(window, (0, 0), false);
     }
 
-    fn new_popup(&mut self, surface: PopupSurface, positioner: PositionerState) {}
+    fn new_popup(&mut self, _surface: PopupSurface, _positioner: PositionerState) {}
 
-    fn grab(&mut self, surface: PopupSurface, seat: WlSeat, serial: Serial) {}
+    fn grab(&mut self, _surface: PopupSurface, _seat: WlSeat, _serial: Serial) {}
 
     fn reposition_request(
         &mut self,
-        surface: PopupSurface,
-        positioner: PositionerState,
-        token: u32,
+        _surface: PopupSurface,
+        _positioner: PositionerState,
+        _token: u32,
     ) {
     }
 }

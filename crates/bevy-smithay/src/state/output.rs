@@ -1,4 +1,5 @@
-use {super::SmithayAppRunnerState, smithay::wayland::output::OutputHandler};
+use super::SmithayAppRunnerState;
+use smithay::wayland::output::OutputHandler;
 
 impl OutputHandler for SmithayAppRunnerState {}
 

@@ -1,8 +1,6 @@
-use {
-    super::SmithayAppRunnerState,
-    smithay::wayland::security_context::{
-        SecurityContext, SecurityContextHandler, SecurityContextListenerSource,
-    },
+use super::SmithayAppRunnerState;
+use smithay::wayland::security_context::{
+    SecurityContext, SecurityContextHandler, SecurityContextListenerSource,
 };
 
 impl SecurityContextHandler for SmithayAppRunnerState {

@@ -1,13 +1,9 @@
-use bevy::{
-    prelude::*,
-    render::{
-        extract_resource::{ExtractResource, ExtractResourcePlugin},
-        render_asset::RenderAssets,
-        texture::GpuImage,
-        Render, RenderApp, RenderSet,
-    },
-    utils::HashMap,
-};
+use bevy::prelude::*;
+use bevy::render::extract_resource::{ExtractResource, ExtractResourcePlugin};
+use bevy::render::render_asset::RenderAssets;
+use bevy::render::texture::GpuImage;
+use bevy::render::{Render, RenderApp, RenderSet};
+use bevy::utils::HashMap;
 
 pub struct ExternalImagePlugin;
 

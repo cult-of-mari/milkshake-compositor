@@ -1,18 +1,19 @@
-use {
-    super::SmithayAppRunnerState,
-    smithay::wayland::selection::data_device::{
-        ClientDndGrabHandler, DataDeviceHandler, DataDeviceState, ServerDndGrabHandler,
-    },
+use super::SmithayAppRunnerState;
+use smithay::input::Seat;
+use smithay::reexports::wayland_server::protocol::wl_data_source::WlDataSource;
+use smithay::reexports::wayland_server::protocol::wl_surface::WlSurface;
+use smithay::wayland::selection::data_device::{
+    ClientDndGrabHandler, DataDeviceHandler, DataDeviceState, ServerDndGrabHandler,
 };
 
 impl ClientDndGrabHandler for SmithayAppRunnerState {
-    fn dropped(&mut self, _seat: smithay::input::Seat<Self>) {}
+    fn dropped(&mut self, _target: Option<WlSurface>, _validated: bool, _seat: Seat<Self>) {}
 
     fn started(
         &mut self,
-        _source: Option<smithay::reexports::wayland_server::protocol::wl_data_source::WlDataSource>,
-        _icon: Option<smithay::reexports::wayland_server::protocol::wl_surface::WlSurface>,
-        _eat: smithay::input::Seat<Self>,
+        _source: Option<WlDataSource>,
+        _icon: Option<WlSurface>,
+        _seat: Seat<Self>,
     ) {
     }
 }
